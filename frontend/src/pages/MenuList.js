@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import bgImage from '../assets/images/person-serving-cup-coffee.jpg';
+import chickenSkewersImg from '../assets/images/chicken-skewers-with-slices-apples-chili.jpg';
+import highAngleDrinksImg from '../assets/images/high-angle-mix-alcoholic-drinks.jpg';
+import personServingCoffeeImg from '../assets/images/person-serving-cup-coffee.jpg';
 
 const MenuList = () => {
   const [menus, setMenus] = useState([]);
@@ -154,6 +157,15 @@ const MenuList = () => {
                     onMouseOut={e => e.currentTarget.style.transform = 'none'}
                   >
                     <div className="card-content category-card-content" style={{ color: '#b2dfdb', fontSize: '2.5rem', marginBottom: '1rem' }}>
+                      {idx === 0 && (
+                        <img src={personServingCoffeeImg} alt="Coffee" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', display: 'block', margin: '0 auto 8px auto', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} />
+                      )}
+                      {category.toLowerCase() === 'food' && (
+                        <img src={chickenSkewersImg} alt="Chicken Skewers" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', display: 'block', margin: '0 auto 8px auto', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} />
+                      )}
+                      {(category.toLowerCase() === 'softdrinks' || category.toLowerCase() === 'softdrink') && (
+                        <img src={highAngleDrinksImg} alt="Soft Drinks" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', display: 'block', margin: '0 auto 8px auto', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} />
+                      )}
                       <div className="category-icon">
                         {getCategoryIcon(category)}
                       </div>
