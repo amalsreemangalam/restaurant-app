@@ -15,6 +15,11 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Friendly root route
+app.get('/', (req, res) => {
+  res.send('Backend is running! Use /api/menus or /api/items for API access.');
+});
+
 // Routes
 app.use('/api/menus', require('./routes/menuRoutes'));
 app.use('/api/items', require('./routes/menuItemRoutes'));
