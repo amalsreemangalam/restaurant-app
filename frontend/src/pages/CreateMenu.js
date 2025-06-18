@@ -20,7 +20,7 @@ const CreateMenu = () => {
     // Fetch existing categories from backend
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/menus');
+        const response = await axios.get('https://restaurant-app-8555.onrender.com/api/menus');
         const uniqueCategories = Array.from(new Set(response.data.map(menu => menu.category && menu.category.toLowerCase()).filter(Boolean)));
         setCategories(uniqueCategories);
       } catch (err) {
@@ -90,7 +90,7 @@ const CreateMenu = () => {
         price: parseFloat(formData.price)
       };
 
-      const response = await axios.post('http://localhost:5000/api/menus', menuData);
+      const response = await axios.post('https://restaurant-app-8555.onrender.com/api/menus', menuData);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Failed to create menu. Please try again.');

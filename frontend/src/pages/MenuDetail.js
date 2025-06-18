@@ -13,8 +13,8 @@ function MenuDetail() {
     const fetchMenuAndItems = async () => {
       try {
         const [menuResponse, itemsResponse] = await Promise.all([
-          axios.get(`http://localhost:5000/api/menus/${id}`),
-          axios.get(`http://localhost:5000/api/items/menu/${id}`)
+          axios.get('https://restaurant-app-8555.onrender.com/api/menus/' + id),
+          axios.get('https://restaurant-app-8555.onrender.com/api/items/menu/' + id)
         ]);
         setMenu(menuResponse.data);
         setMenuItems(itemsResponse.data);

@@ -15,7 +15,7 @@ function EditMenu() {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/menus/${id}`);
+        const response = await axios.get('https://restaurant-app-8555.onrender.com/api/menus/' + id);
         setFormData({
           name: response.data.name,
           description: response.data.description
@@ -41,7 +41,7 @@ function EditMenu() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/menus/${id}`, formData);
+      await axios.put('https://restaurant-app-8555.onrender.com/api/menus/' + id, formData);
       navigate(`/menus/${id}`);
     } catch (err) {
       setError('Failed to update menu');

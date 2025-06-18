@@ -13,12 +13,12 @@ const MenuList = () => {
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/menus');
+        const response = await axios.get('https://restaurant-app-8555.onrender.com/api/menus');
         setMenus(response.data);
         
         // Fetch menu items for each menu
         const itemsPromises = response.data.map(menu => 
-          axios.get(`http://localhost:5000/api/items/menu/${menu._id}`)
+          axios.get('https://restaurant-app-8555.onrender.com/api/items/menu/' + menu._id)
         );
         const itemsResponses = await Promise.all(itemsPromises);
         
