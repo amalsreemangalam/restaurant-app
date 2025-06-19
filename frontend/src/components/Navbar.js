@@ -21,6 +21,15 @@ const Navbar = () => {
     };
   }, [menuOpen]);
 
+  const navLinkStyle = {
+    color: '#fff',
+    textDecoration: 'none',
+    fontWeight: 500,
+    transition: 'color 0.3s ease',
+    pointerEvents: 'auto',
+    cursor: 'pointer'
+  };
+
   return (
     <nav className="navbar vibrant-navbar" style={{ 
       width: '100%', 
@@ -97,14 +106,16 @@ const Navbar = () => {
           gap: '2.5rem',
           marginLeft: 'auto',
           zIndex: 10,
+          listStyle: 'none'
         }}>
-          <li><Link to="/" className="nav-link">Home</Link></li>
-          <li><Link to="/menus/create" className="nav-link">Create Menu</Link></li>
-          <li><span className="nav-link" style={{ cursor: 'default', opacity: 0.6 }}>Make Reservation</span></li>
+          <li><Link to="/" className="nav-link" style={navLinkStyle}>Home</Link></li>
+          <li><Link to="/menus/create" className="nav-link" style={navLinkStyle}>Create Menu</Link></li>
+          <li><span style={{ ...navLinkStyle, opacity: 0.6, cursor: 'default' }}>Make Reservation</span></li>
           <li>
             <a
               href="#footer-contact"
               className="nav-link"
+              style={navLinkStyle}
               onClick={e => {
                 e.preventDefault();
                 const el = document.getElementById('footer-contact');
@@ -137,13 +148,14 @@ const Navbar = () => {
             margin: 0,
             listStyle: 'none',
           }}>
-            <li><Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>Home</Link></li>
-            <li><Link to="/menus/create" className="nav-link" onClick={() => setMenuOpen(false)}>Create Menu</Link></li>
-            <li><span className="nav-link" style={{ cursor: 'default', opacity: 0.6 }}>Make Reservation</span></li>
+            <li><Link to="/" className="nav-link" onClick={() => setMenuOpen(false)} style={navLinkStyle}>Home</Link></li>
+            <li><Link to="/menus/create" className="nav-link" onClick={() => setMenuOpen(false)} style={navLinkStyle}>Create Menu</Link></li>
+            <li><span style={{ ...navLinkStyle, opacity: 0.6, cursor: 'default' }}>Make Reservation</span></li>
             <li>
               <a
                 href="#footer-contact"
                 className="nav-link"
+                style={navLinkStyle}
                 onClick={e => {
                   e.preventDefault();
                   setMenuOpen(false);
@@ -179,21 +191,6 @@ const Navbar = () => {
             opacity: 1;
             visibility: visible;
           }
-          
-          .mobile-nav .nav-link {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 500;
-            transition: color 0.2s;
-            padding: 0.5rem 0;
-            display: block;
-            width: 100%;
-          }
-
-          .mobile-nav .nav-link:hover {
-            color: #2196f3;
-          }
         }
         
         @media (min-width: 1025px) {
@@ -202,20 +199,17 @@ const Navbar = () => {
           .desktop-nav { display: flex !important; }
           .navbar-brand-text { display: flex !important; }
         }
-        
-        .nav-link {
-          color: #fff;
-          text-decoration: none;
-          font-weight: 500;
-          transition: color 0.2s;
-        }
-        
-        .nav-link:hover {
-          color: #2196f3 !important;
-        }
-        
-        .navbar-brand span span:last-child {
-          color: #857878 !important;
+
+        /* Remove all hover effects */
+        .nav-link:hover,
+        .nav-link:focus,
+        .nav-link:active,
+        a:hover,
+        a:focus,
+        a:active {
+          color: #00aaff !important;
+          text-decoration: none !important;
+          opacity: 1 !important;
         }
 
         /* Add overlay for the rest of the screen */
@@ -224,7 +218,7 @@ const Navbar = () => {
           position: fixed;
           top: 0;
           right: 250px;
-          left: 0,
+          left: 0;
           bottom: 0;
           background: rgba(0, 0, 0, 0.5);
           opacity: ${menuOpen ? '1' : '0'};

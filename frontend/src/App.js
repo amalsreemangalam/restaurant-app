@@ -25,12 +25,22 @@ function App() {
       const response = await axios.get('https://restaurant-app-8555.onrender.com/api/menus');
       const uniqueCategories = Array.from(new Set(response.data.map(menu => menu.category && menu.category.toLowerCase()).filter(Boolean)));
       setCategories(uniqueCategories);
+      
+      // If we're on the home page and there's no category selected, select the first available category
+      if (location.pathname === '/' && (!selectedCategory || !uniqueCategories.includes(selectedCategory))) {
+        const defaultCategory = uniqueCategories[0];
+        if (defaultCategory) {
+          setSelectedCategory(defaultCategory);
+          navigate(`/?category=${defaultCategory}`, { replace: true });
+        }
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching categories:', error);
       setLoading(false);
     }
-  }, []);
+  }, [location.pathname, navigate, selectedCategory]);
 
   useEffect(() => {
     fetchCategories();
@@ -40,14 +50,17 @@ function App() {
     if (location.pathname === '/') {
       const urlParams = new URLSearchParams(location.search);
       const categoryFromUrl = urlParams.get('category');
+      
       if (categoryFromUrl) {
         setSelectedCategory(categoryFromUrl.toLowerCase());
-      } else {
-        setSelectedCategory('juice');
-        navigate('/?category=juice', { replace: true });
+      } else if (categories.length > 0) {
+        // If no category in URL but we have categories, use the first one
+        const defaultCategory = categories[0];
+        setSelectedCategory(defaultCategory);
+        navigate(`/?category=${defaultCategory}`, { replace: true });
       }
     }
-  }, [location.search, location.pathname, navigate]);
+  }, [location.search, location.pathname, navigate, categories]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -59,14 +72,8 @@ function App() {
   }, []);
 
   const handleCategoryClick = (category) => {
-    const newCategory = selectedCategory === category ? null : category;
-    setSelectedCategory(newCategory);
-    
-    if (newCategory) {
-      navigate(`/?category=${newCategory}`);
-    } else {
-      navigate('/');
-    }
+    setSelectedCategory(category); // Always set the category, don't toggle
+    navigate(`/?category=${category}`);
   };
 
   const isCreateMenuPage = location.pathname === '/menus/create';
