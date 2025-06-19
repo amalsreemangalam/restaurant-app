@@ -21,50 +21,57 @@ const MenuList = ({ selectedCategory }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    const fetchMenus = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await axios.get('https://restaurant-app-8555.onrender.com/api/menus');
-        if (!response.data) {
-          throw new Error('No data received from server');
-        }
-        
-        setMenus(response.data);
-        
-        // Fetch menu items for each menu
-        const itemsPromises = response.data.map(menu => 
-          axios.get('https://restaurant-app-8555.onrender.com/api/items/menu/' + menu._id)
-        );
-        
-        const itemsResponses = await Promise.all(itemsPromises);
-        
-        // Create a map of menu items by menu ID
-        const menuItemsMap = {};
-        response.data.forEach((menu, index) => {
-          menuItemsMap[menu._id] = itemsResponses[index].data;
-        });
-        
-        setMenuItems(menuItemsMap);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to fetch menus. Please try again.');
-        setLoading(false);
-        
-        // Retry logic
-        if (retryCount < 3) {
-          setTimeout(() => {
-            setRetryCount(prev => prev + 1);
-          }, 2000); 
-        }
+  const fetchMenus = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.get('https://restaurant-app-8555.onrender.com/api/menus');
+      if (!response.data) {
+        throw new Error('No data received from server');
       }
-    };
+      
+      setMenus(response.data);
+      
+      // Fetch menu items for each menu
+      const itemsPromises = response.data.map(menu => 
+        axios.get('https://restaurant-app-8555.onrender.com/api/items/menu/' + menu._id)
+      );
+      
+      const itemsResponses = await Promise.all(itemsPromises);
+      
+      // Create a map of menu items by menu ID
+      const menuItemsMap = {};
+      response.data.forEach((menu, index) => {
+        menuItemsMap[menu._id] = itemsResponses[index].data;
+      });
+      
+      setMenuItems(menuItemsMap);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Failed to fetch menus. Please try again.');
+      setLoading(false);
+      
+      if (retryCount < 3) {
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+        }, 2000);
+      }
+    }
+  };
 
+  // Fetch menus whenever component mounts or retryCount changes
+  useEffect(() => {
     fetchMenus();
-  }, [retryCount]); 
+  }, [retryCount]);
+
+  // Re-fetch when selectedCategory changes
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchMenus();
+    }
+  }, [selectedCategory]);
 
   // Filter menus based on selected category
   const filteredMenus = selectedCategory
@@ -73,47 +80,76 @@ const MenuList = ({ selectedCategory }) => {
         const selectedCat = selectedCategory.toLowerCase().trim();
         return menuCategory === selectedCat;
       })
-    : [];
-
-  if (!selectedCategory) {
-    return (
-      <div className="container" style={{ minHeight: '40vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="alert" style={{ textAlign: 'center', color: '#fff', background: 'rgba(0,0,0,0.7)', border: '2px solid #fff', borderRadius: '18px', padding: '2rem 3rem', fontSize: '1.3rem' }}>
-          Please select a category to view menus.
-        </div>
-      </div>
-    );
-  }
+    : menus;
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <div className="loading-text">Loading menus...</div>
+      <div className="loading-container" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '50vh',
+        color: '#fff'
+      }}>
+        <div className="loading-spinner" style={{
+          border: '4px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '50%',
+          borderTop: '4px solid #fff',
+          width: '40px',
+          height: '40px',
+          animation: 'spin 1s linear infinite',
+          marginBottom: '1rem'
+        }}></div>
+        <div className="loading-text" style={{
+          fontSize: '1.2rem',
+          fontWeight: '500'
+        }}>Loading menus...</div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="error-container">
-        <div className="error-message">{error}</div>
+      <div className="error-container" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '50vh',
+        padding: '2rem'
+      }}>
+        <div className="error-message" style={{
+          color: '#fff',
+          fontSize: '1.2rem',
+          marginBottom: '1rem',
+          textAlign: 'center',
+          background: 'rgba(0,0,0,0.7)',
+          padding: '1rem 2rem',
+          borderRadius: '8px'
+        }}>{error}</div>
         <button 
           className="retry-button"
           onClick={() => setRetryCount(prev => prev + 1)}
+          style={{
+            background: '#2196f3',
+            color: '#fff',
+            border: 'none',
+            padding: '0.8rem 2rem',
+            borderRadius: '8px',
+            fontSize: '1rem',
+            cursor: 'pointer',
+            transition: 'background 0.2s',
+          }}
         >
           Retry
         </button>
-      </div>
-    );
-  }
-
-  if (menus.length === 0 && !loading && !error) {
-    return (
-      <div className="container">
-        <div className="alert">
-          No menus found. Create your first menu to get started!
-        </div>
       </div>
     );
   }
@@ -128,6 +164,8 @@ const MenuList = ({ selectedCategory }) => {
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       {/* Overlay */}
@@ -141,7 +179,15 @@ const MenuList = ({ selectedCategory }) => {
         zIndex: 1,
         pointerEvents: 'none',
       }} />
-      <div className="container" style={{ position: 'relative', zIndex: 2, marginTop: '1.5rem' }}>
+      <div className="container" style={{ 
+        position: 'relative', 
+        zIndex: 2, 
+        marginTop: '1.5rem',
+        flex: '1 0 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
+      }}>
         <div style={{ 
           maxWidth: '1100px', 
           margin: '2rem auto', 
@@ -151,6 +197,10 @@ const MenuList = ({ selectedCategory }) => {
           padding: '2.5rem 2rem',
           background: 'transparent',
           paddingTop: '5.5rem',
+          flex: '1 0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          marginBottom: '2rem',
         }}>
           {/* Drink image at top left */}
           <img 
@@ -199,42 +249,93 @@ const MenuList = ({ selectedCategory }) => {
           }}>
             {selectedCategory ? `${selectedCategory} Menu`.toUpperCase() : 'Menu'}
           </h1>
-          <div className="menu-items-list" style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-            gap: isMobile ? '1rem' : '2.5rem 2.5rem',
-            width: '100%',
-            margin: '0 auto',
-            padding: 0,
-            maxWidth: isMobile ? '500px' : '1000px',
-            paddingRight: isMobile ? '0.5rem' : '3rem',
-            paddingLeft: isMobile ? '0.5rem' : '0',
-            paddingBottom: '3rem',
-          }}>
-            {filteredMenus.length === 0 ? (
-              <div className="alert" style={{ gridColumn: '1/-1', textAlign: 'center', color: '#fff' }}>
-                No menus found for this category.
-          </div>
-        ) : (
-              filteredMenus.map((menu, idx) => (
-                <div key={menu._id || idx} style={{ width: '100%' }}>
+          
+          {filteredMenus.length === 0 ? (
+            <div className="alert" style={{ 
+              gridColumn: '1/-1', 
+              textAlign: 'center', 
+              color: '#fff',
+              background: 'rgba(0,0,0,0.7)',
+              padding: '2rem',
+              borderRadius: '12px',
+              margin: '2rem auto',
+              maxWidth: '500px',
+              width: '100%'
+            }}>
+              {selectedCategory ? `No menus found for ${selectedCategory} category.` : 'Please select a category to view menus.'}
+              <div style={{ marginTop: '1rem' }}>
+                <button 
+                  onClick={fetchMenus} 
+                  style={{
+                    background: '#2196f3',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '0.8rem 2rem',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  Refresh Menus
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="menu-items-list" style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 
+                window.innerWidth >= 3840 ? 'repeat(3, 1fr)' :
+                window.innerWidth >= 1024 ? '1fr 1fr' : '1fr',
+              gap: isMobile ? '0.75rem' : 
+                window.innerWidth >= 3840 ? '2.5rem 3rem' : '1.5rem 2rem',
+              width: '100%',
+              margin: '0 auto',
+              padding: 0,
+              maxWidth: isMobile ? '500px' : 
+                window.innerWidth >= 3840 ? '2800px' :
+                window.innerWidth >= 1024 ? '1000px' : '500px',
+              paddingRight: isMobile ? '0.5rem' : 
+                window.innerWidth >= 3840 ? '4rem' : '3rem',
+              paddingLeft: isMobile ? '0.5rem' : 
+                window.innerWidth >= 3840 ? '1rem' : '0',
+              paddingBottom: window.innerWidth >= 3840 ? '3rem' : '2rem',
+              flex: '1 0 auto',
+            }}>
+              {filteredMenus.map((menu, idx) => (
+                <div key={menu._id || idx} style={{ 
+                  width: '100%',
+                  marginBottom: isMobile ? '0.5rem' : 
+                    window.innerWidth >= 3840 ? '1.5rem' : '0.75rem',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: window.innerWidth >= 3840 ? '24px' : '16px',
+                  padding: window.innerWidth >= 3840 ? '2rem' : '1.5rem',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}>
                   <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
                     alignItems: 'center', 
                     fontWeight: 700, 
-                    fontSize: isMobile ? '1.1rem' : '1.25rem', 
+                    fontSize: isMobile ? '1.1rem' : 
+                      window.innerWidth >= 3840 ? '1.8rem' : '1.25rem', 
                     color: '#fff', 
                     letterSpacing: '1px', 
-                    marginBottom: '0.2rem', 
+                    marginBottom: window.innerWidth >= 3840 ? '0.5rem' : '0.15rem', 
                     fontFamily: 'Oswald, Arial, sans-serif',
                     flexWrap: isMobile ? 'wrap' : 'nowrap',
-                    gap: isMobile ? '0.5rem' : '0',
+                    gap: isMobile ? '0.3rem' : '0',
                   }}>
-                    <span style={{ textTransform: 'uppercase', fontSize: isMobile ? '1rem' : '1.25rem' }}>{menu.name}</span>
+                    <span style={{ 
+                      textTransform: 'uppercase', 
+                      fontSize: isMobile ? '1rem' : 
+                        window.innerWidth >= 3840 ? '1.8rem' : '1.25rem' 
+                    }}>{menu.name}</span>
                     <span style={{ 
                       fontWeight: 700, 
-                      fontSize: isMobile ? '1rem' : '1.2rem', 
+                      fontSize: isMobile ? '1rem' : 
+                        window.innerWidth >= 3840 ? '1.6rem' : '1.2rem', 
                       color: '#fff', 
                       marginLeft: isMobile ? '0' : '1rem', 
                       whiteSpace: 'nowrap' 
@@ -242,34 +343,39 @@ const MenuList = ({ selectedCategory }) => {
                   </div>
                   <div style={{ 
                     color: '#bdbdbd', 
-                    fontSize: isMobile ? '0.9rem' : '1.05rem', 
+                    fontSize: isMobile ? '0.9rem' : 
+                      window.innerWidth >= 3840 ? '1.4rem' : '1.05rem', 
                     fontFamily: '"Kelly Slab", cursive', 
-                    marginBottom: '0.5rem', 
+                    marginBottom: window.innerWidth >= 3840 ? '1rem' : '0.3rem', 
                     marginLeft: '0.1rem',
-                    lineHeight: isMobile ? '1.4' : '1.2',
+                    lineHeight: isMobile ? '1.3' : 
+                      window.innerWidth >= 3840 ? '1.6' : '1.2',
                   }}>{menu.description}</div>
-                              {menuItems[menu._id] && menuItems[menu._id].length > 0 && (
-                                <ul style={{
-                                  padding: 0,
-                                  margin: '0.5rem 0 0 0',
-                                  listStyle: 'none',
-                                  color: 'rgba(255, 255, 255, 0.7)',
-                                  fontSize: isMobile ? '0.85rem' : '1rem',
-                                }}>
-                                  {menuItems[menu._id].map(item => (
-                                    <li key={item._id} style={{ 
-                                      marginBottom: isMobile ? '0.3rem' : '0.5rem',
-                                    }}>
-                                      • {item.name} - ${typeof item.price === 'number' ? item.price.toFixed(2) : '0.00'}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
+                  {menuItems[menu._id] && menuItems[menu._id].length > 0 && (
+                    <ul style={{
+                      padding: 0,
+                      margin: window.innerWidth >= 3840 ? '1rem 0 0 0' : '0.5rem 0 0 0',
+                      listStyle: 'none',
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: isMobile ? '0.85rem' : 
+                        window.innerWidth >= 3840 ? '1.3rem' : '1rem',
+                    }}>
+                      {menuItems[menu._id].map(item => (
+                        <li key={item._id} style={{ 
+                          marginBottom: isMobile ? '0.3rem' : 
+                            window.innerWidth >= 3840 ? '0.8rem' : '0.5rem',
+                          padding: window.innerWidth >= 3840 ? '0.5rem 0' : '0',
+                        }}>
+                          • {item.name} - ${typeof item.price === 'number' ? item.price.toFixed(2) : '0.00'}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -138,15 +138,22 @@ function App() {
             }}>
               <div style={{
                 display: 'flex',
-                justifyContent: 'center',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: isMobile ? '1rem' : '2.5rem',
+                justifyContent: 'center',
                 width: '100%',
-                maxWidth: '900px',
+                maxWidth: '100%',
                 margin: '0 auto',
-                flexWrap: 'wrap',
-                flexDirection: isMobile ? 'column' : 'row',
+                padding: '0.5rem 0',
+                position: 'relative',
+                zIndex: 3,
+                overflow: 'hidden'
               }}>
+                <div className="category-container" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                }}>
                 {loading ? (
                   <div style={{ color: '#fff', fontSize: '1.2rem' }}>Loading categories...</div>
                 ) : categories.length > 0 ? (
@@ -159,23 +166,29 @@ function App() {
                         cursor: 'pointer',
                         background: selectedCategory === category ? '#2196f3' : '#000000CC',
                         transition: 'all 0.3s ease',
-                        minWidth: '120px',
-                        minHeight: '50px',
                         display: 'flex',
-                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '1.2rem',
+                        fontSize: window.innerWidth <= 374 ? '11px' : (isMobile ? '13px' : '14px'),
                         fontWeight: 700,
                         boxSizing: 'border-box',
                       }}
                     >
-                      <div style={{ textAlign: 'center' }}>{category.toUpperCase()}</div>
+                      <div style={{ 
+                        textAlign: 'center',
+                        padding: window.innerWidth <= 374 ? '0.15rem' : '0.25rem',
+                        wordBreak: 'break-word',
+                        maxWidth: '100%',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>{category.toUpperCase()}</div>
                     </div>
                   ))
                 ) : (
                   <div style={{ color: '#fff', fontSize: '1.2rem' }}>No categories available</div>
                 )}
+                </div>
               </div>
             </div>
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)' }}></div>

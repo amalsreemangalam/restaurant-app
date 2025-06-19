@@ -25,7 +25,7 @@ const Navbar = () => {
     <nav className="navbar vibrant-navbar" style={{ 
       width: '100%', 
       height: '120px', 
-      top: '-2px', 
+      top: 0,
       background: '#121618', 
       position: 'relative', 
       boxShadow: 'none', 
@@ -33,9 +33,37 @@ const Navbar = () => {
       margin: 0, 
       border: 0, 
       backgroundColor: '#121618',
-      zIndex: 1000
+      zIndex: 1000,
+      marginBottom: '-1px'
     }}>
       <div className="navbar-container" style={{ position: 'relative', height: '100%', padding: '0 20px' }}>
+        <button
+          className="hamburger"
+          aria-label="Toggle menu"
+          onClick={() => setMenuOpen(!menuOpen)}
+          style={{
+            background: 'none',
+            border: 'none',
+            display: 'none',
+            fontSize: '24px',
+            color: '#fff',
+            cursor: 'pointer',
+            position: 'absolute',
+            top: '50%',
+            right: '20px',
+            left: 'auto',
+            transform: 'translateY(-50%)',
+            zIndex: 1001,
+            padding: '8px',
+            width: '40px',
+            height: '40px',
+            borderRadius: '4px',
+            transition: 'background-color 0.3s ease'
+          }}
+        >
+          <i className={`fas ${menuOpen ? 'fa-times' : 'fa-bars'}`} style={{ fontSize: '20px' }}></i>
+        </button>
+
         <Link to="/" className="navbar-brand vibrant-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', position: 'relative', zIndex: 20 }}>
           <img 
             src={logo} 
@@ -58,31 +86,9 @@ const Navbar = () => {
               <span style={{ color: '#00aaff', fontWeight: 700, letterSpacing: '2px', fontSize: '2rem', fontFamily: 'Oswald, Arial, sans-serif' }}>DEEP </span>
               <span style={{ color: '#fff', fontWeight: 700, letterSpacing: '2px', fontSize: '2rem', fontFamily: 'Oswald, Arial, sans-serif' }}>NET</span>
             </span>
-            <span className="brand-soft-text" style={{ color: '#857878', fontWeight: 700, letterSpacing: '2px', fontSize: '2rem', fontFamily: 'Oswald, Arial, sans-serif' }}>SOFT</span>
+            <span className="brand-soft-text" style={{ color: '#d72660', fontWeight: 700, letterSpacing: '2px', fontSize: '2rem', fontFamily: 'Oswald, Arial, sans-serif' }}>SOFT</span>
           </span>
         </Link>
-
-        <button
-          className="hamburger"
-          aria-label="Toggle menu"
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{
-            background: 'none',
-            border: 'none',
-            display: 'none',
-            fontSize: '32px',
-            color: '#fff',
-            cursor: 'pointer',
-            position: 'absolute',
-            top: '50%',
-            right: '20px',
-            transform: 'translateY(-50%)',
-            zIndex: 1001,
-            padding: '10px',
-          }}
-        >
-          <i className={`fas ${menuOpen ? 'fa-times' : 'fa-bars'}`}></i>
-        </button>
 
         <ul className="navbar-nav desktop-nav" style={{
           display: 'flex',
@@ -109,8 +115,28 @@ const Navbar = () => {
           </li>
         </ul>
 
-        <div className={`mobile-nav-overlay${menuOpen ? ' open' : ''}`}>
-          <ul className="navbar-nav mobile-nav">
+        <div className={`mobile-nav-overlay${menuOpen ? ' open' : ''}`} style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          left: 'auto',
+          width: '250px',
+          height: '100vh',
+          background: '#121618',
+          transform: menuOpen ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform 0.3s ease-in-out',
+          boxShadow: menuOpen ? '-2px 0 8px rgba(0,0,0,0.5)' : 'none',
+          zIndex: 1000,
+        }}>
+          <ul className="navbar-nav mobile-nav" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '1rem',
+            padding: '80px 1.5rem',
+            margin: 0,
+            listStyle: 'none',
+          }}>
             <li><Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>Home</Link></li>
             <li><Link to="/menus/create" className="nav-link" onClick={() => setMenuOpen(false)}>Create Menu</Link></li>
             <li><span className="nav-link" style={{ cursor: 'default', opacity: 0.6 }}>Make Reservation</span></li>
@@ -135,42 +161,38 @@ const Navbar = () => {
         @media (max-width: 1024px) {
           .desktop-nav { display: none !important; }
           .navbar-brand-text { display: none !important; }
-          .hamburger { display: block !important; }
-          
-          .mobile-nav-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background-color: rgba(18, 22, 24, 0.98);
-            z-index: 1000;
+          .hamburger { 
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
           }
           
-          .mobile-nav-overlay.open {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+          .hamburger:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+          
+          .mobile-nav-overlay {
+            display: block;
           }
           
           .mobile-nav {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2rem;
-            padding: 0;
-            margin: 0;
-            list-style: none;
+            opacity: 1;
+            visibility: visible;
           }
           
           .mobile-nav .nav-link {
             color: #fff;
             text-decoration: none;
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 500;
             transition: color 0.2s;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 0;
+            display: block;
+            width: 100%;
+          }
+
+          .mobile-nav .nav-link:hover {
+            color: #2196f3;
           }
         }
         
@@ -194,6 +216,27 @@ const Navbar = () => {
         
         .navbar-brand span span:last-child {
           color: #857878 !important;
+        }
+
+        /* Add overlay for the rest of the screen */
+        .mobile-nav-overlay::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          right: 250px;
+          left: 0,
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          opacity: ${menuOpen ? '1' : '0'};
+          visibility: ${menuOpen ? 'visible' : 'hidden'};
+          transition: opacity 0.3s ease-in-out;
+          z-index: 999;
+          pointer-events: ${menuOpen ? 'auto' : 'none'};
+        }
+
+        /* Close menu when clicking outside */
+        .mobile-nav-overlay.open::before {
+          cursor: pointer;
         }
       `}</style>
     </nav>
