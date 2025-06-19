@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
-import bgImage from '../assets/images/person-serving-cup-coffee.jpg';
-import chickenSkewersImg from '../assets/images/chicken-skewers-with-slices-apples-chili.jpg';
-import highAngleDrinksImg from '../assets/images/high-angle-mix-alcoholic-drinks.jpg';
-import personServingCoffeeImg from '../assets/images/person-serving-cup-coffee.jpg';
+import bgImage from '../assets/images/53f3e533f37f4a258b3eea846bf145fb95b71dfd.png';
+import drinkImage from '../assets/images/08f1ba9209e436820849a421ec0b1fe5126bf9b5.png';
+import cocktailImage from '../assets/images/6b91b238f07a69022d4c64e313237eadaceb997f (1).png';
 
-const MenuList = () => {
+const MenuList = ({ selectedCategory }) => {
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [menuItems, setMenuItems] = useState({});
   const [retryCount, setRetryCount] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -27,14 +34,14 @@ const MenuList = () => {
         
         setMenus(response.data);
         
-      
+        // Fetch menu items for each menu
         const itemsPromises = response.data.map(menu => 
           axios.get('https://restaurant-app-8555.onrender.com/api/items/menu/' + menu._id)
         );
         
         const itemsResponses = await Promise.all(itemsPromises);
         
-      
+        // Create a map of menu items by menu ID
         const menuItemsMap = {};
         response.data.forEach((menu, index) => {
           menuItemsMap[menu._id] = itemsResponses[index].data;
@@ -47,7 +54,7 @@ const MenuList = () => {
         setError('Failed to fetch menus. Please try again.');
         setLoading(false);
         
-       
+        // Retry logic
         if (retryCount < 3) {
           setTimeout(() => {
             setRetryCount(prev => prev + 1);
@@ -59,11 +66,30 @@ const MenuList = () => {
     fetchMenus();
   }, [retryCount]); 
 
+  // Filter menus based on selected category
+  const filteredMenus = selectedCategory
+    ? menus.filter(menu => {
+        const menuCategory = menu.category ? menu.category.toLowerCase().trim() : '';
+        const selectedCat = selectedCategory.toLowerCase().trim();
+        return menuCategory === selectedCat;
+      })
+    : [];
+
+  if (!selectedCategory) {
+    return (
+      <div className="container" style={{ minHeight: '40vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="alert" style={{ textAlign: 'center', color: '#fff', background: 'rgba(0,0,0,0.7)', border: '2px solid #fff', borderRadius: '18px', padding: '2rem 3rem', fontSize: '1.3rem' }}>
+          Please select a category to view menus.
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <div className="loading-text">Loading categories...</div>
+        <div className="loading-text">Loading menus...</div>
       </div>
     );
   }
@@ -82,151 +108,169 @@ const MenuList = () => {
     );
   }
 
-  
-  const categories = Array.from(new Set(menus.map(menu => menu.category && menu.category.toLowerCase()).filter(Boolean)));
-
-  if (categories.length === 0 && !loading && !error) {
+  if (menus.length === 0 && !loading && !error) {
     return (
       <div className="container">
         <div className="alert">
-          No categories found. Create your first menu to get started!
+          No menus found. Create your first menu to get started!
         </div>
       </div>
     );
   }
-
-
-  const getCategoryIcon = (category) => {
-    switch (category.toLowerCase()) {
-      case 'food':
-        return <i className="fas fa-utensils"></i>; // fork & knife
-      case 'drinks':
-      case 'drink':
-        return <span role="img" aria-label="Drink" style={{fontSize: '2.5rem'}}>🥤</span>; // cup with straw emoji
-      case 'softdrinks':
-      case 'softdrink':
-        return <span role="img" aria-label="Softdrink" style={{fontSize: '2.5rem'}}>🧃</span>; // juice box emoji
-      case 'brunch':
-        return <span role="img" aria-label="Brunch" style={{fontSize: '2.5rem'}}>🍳</span>; // fried egg emoji
-      default:
-        return <i className="fas fa-utensils"></i>; // fallback to utensils
-    }
-  };
-
-
-  const filteredMenus = selectedCategory
-    ? menus.filter(menu => menu.category && menu.category.toLowerCase() === selectedCategory)
-    : [];
 
   return (
     <div
       className="home-bg-image"
       style={{
         backgroundImage: `url(${bgImage})`,
-        minHeight: '100vh',
+        minHeight: '95vh',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         position: 'relative',
       }}
     >
+      {/* Overlay */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: '#000000CC',
+        zIndex: 1,
+        pointerEvents: 'none',
+      }} />
       <div className="container" style={{ position: 'relative', zIndex: 2, marginTop: '1.5rem' }}>
-        <div className="main-heading-section" style={{ marginTop: 0 }}>
-          <h1 className="main-heading">Menu</h1>
-          <p className="main-subheading">Please take a look at our menu featuring food, drinks, and brunch. If you'd like to place an order, use the "Create New Menu" button below.</p>
-        </div>
-        <div className="card-header" style={{ marginTop: '1.2rem' }}>
-          <Link to="/menus/create" className="btn btn-primary">
-            <i className="fas fa-plus"></i> Create New Menu
-          </Link>
-        </div>
-
-        {categories.length === 0 ? (
-          <div className="alert">
-            No categories found. Create your first menu to get started!
+        <div style={{ 
+          maxWidth: '1100px', 
+          margin: '2rem auto', 
+          position: 'relative',
+          border: '2px solid #fff',
+          borderRadius: '18px',
+          padding: '2.5rem 2rem',
+          background: 'transparent',
+          paddingTop: '5.5rem',
+        }}>
+          {/* Drink image at top left */}
+          <img 
+            src={drinkImage} 
+            alt="Drink" 
+            style={{
+              position: 'absolute',
+              top: '-40px',
+              left: '-20px',
+              width: '130px',
+              height: 'auto',
+              zIndex: 10,
+              background: 'transparent',
+              borderRadius: '0 0 18px 0',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
+            }}
+          />
+          {/* Cocktail image at bottom right */}
+          <img
+            src={cocktailImage}
+            alt="Cocktail"
+            style={{
+              position: 'absolute',
+              right: '-20px',
+              bottom: '-20px',
+              width: '160px',
+              height: 'auto',
+              zIndex: 10,
+              background: 'transparent',
+              borderRadius: '18px 0 0 0',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
+            }}
+          />
+          <h1 style={{
+            textAlign: 'center',
+            fontSize: isMobile ? '1.8rem' : '2.5rem',
+            fontWeight: 900,
+            letterSpacing: '2px',
+            color: '#fff',
+            textShadow: '0 2px 8px #000',
+            textTransform: 'uppercase',
+            margin: 0,
+            marginBottom: '2.5rem',
+            paddingTop: '1rem',
+            paddingLeft: '2rem',
+          }}>
+            {selectedCategory ? `${selectedCategory} Menu`.toUpperCase() : 'Menu'}
+          </h1>
+          <div className="menu-items-list" style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+            gap: isMobile ? '1rem' : '2.5rem 2.5rem',
+            width: '100%',
+            margin: '0 auto',
+            padding: 0,
+            maxWidth: isMobile ? '500px' : '1000px',
+            paddingRight: isMobile ? '0.5rem' : '3rem',
+            paddingLeft: isMobile ? '0.5rem' : '0',
+            paddingBottom: '3rem',
+          }}>
+            {filteredMenus.length === 0 ? (
+              <div className="alert" style={{ gridColumn: '1/-1', textAlign: 'center', color: '#fff' }}>
+                No menus found for this category.
           </div>
         ) : (
-          <>
-            <div className="grid">
-              {categories.map((category, idx) => (
-                <div key={idx} className="card-container">
-                  <div
-                    className={`brown-category-card${selectedCategory === category ? ' selected' : ''}`}
-                    onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                    onMouseOver={e => e.currentTarget.style.transform = 'translateY(-6px) scale(1.04)'}
-                    onMouseOut={e => e.currentTarget.style.transform = 'none'}
-                  >
-                    <div className="card-content category-card-content" style={{ color: '#b2dfdb', fontSize: '2.5rem', marginBottom: '1rem' }}>
-                      {idx === 0 && (
-                        <img src={personServingCoffeeImg} alt="Coffee" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', display: 'block', margin: '0 auto 8px auto', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} />
-                      )}
-                      {category.toLowerCase() === 'food' && (
-                        <img src={chickenSkewersImg} alt="Chicken Skewers" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', display: 'block', margin: '0 auto 8px auto', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} />
-                      )}
-                      {(category.toLowerCase() === 'softdrinks' || category.toLowerCase() === 'softdrink') && (
-                        <img src={highAngleDrinksImg} alt="Soft Drinks" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', display: 'block', margin: '0 auto 8px auto', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} />
-                      )}
-                      <div className="category-icon">
-                        {getCategoryIcon(category)}
-                      </div>
-                      <h2 className="category-title" style={{ color: '#fff', fontWeight: 700, fontSize: '1.3rem', marginTop: '0.7rem', letterSpacing: '1px' }}>
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </h2>
-                    </div>
+              filteredMenus.map((menu, idx) => (
+                <div key={menu._id || idx} style={{ width: '100%' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    fontWeight: 700, 
+                    fontSize: isMobile ? '1.1rem' : '1.25rem', 
+                    color: '#fff', 
+                    letterSpacing: '1px', 
+                    marginBottom: '0.2rem', 
+                    fontFamily: 'Oswald, Arial, sans-serif',
+                    flexWrap: isMobile ? 'wrap' : 'nowrap',
+                    gap: isMobile ? '0.5rem' : '0',
+                  }}>
+                    <span style={{ textTransform: 'uppercase', fontSize: isMobile ? '1rem' : '1.25rem' }}>{menu.name}</span>
+                    <span style={{ 
+                      fontWeight: 700, 
+                      fontSize: isMobile ? '1rem' : '1.2rem', 
+                      color: '#fff', 
+                      marginLeft: isMobile ? '0' : '1rem', 
+                      whiteSpace: 'nowrap' 
+                    }}>${typeof menu.price === 'number' ? menu.price.toFixed(2) : '0.00'}</span>
                   </div>
-                  {selectedCategory === category && (
-                    <div className="category-menus-section">
-                      <h3 className="category-menus-heading">
-                        {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Menu
-                      </h3>
-                      <div className="responsive-menu-card">
-                        <div className="menu-card-scroll-area max-h-72 overflow-y-auto overflow-x-hidden w-full">
-                          {filteredMenus.length === 0 ? (
-                            <div className="alert">No menus found for this category.</div>
-                          ) : (
-                            filteredMenus.map(menu => (
-                              <div key={menu._id} className="menu-item w-full">
-                                <div className="menu-item-name break-words">{menu.name}</div>
-                                <div className="menu-item-description break-words">{menu.description}</div>
-                                <div className="menu-item-price">${typeof menu.price === 'number' ? menu.price.toFixed(2) : '0.00'}</div>
-                                {menuItems[menu._id] && menuItems[menu._id].length > 0 && (
-                                  <ul style={{
-                                    padding: 0,
-                                    margin: '0.5rem 0 0 0',
-                                    listStyle: 'none',
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                  }}>
-                                    {menuItems[menu._id].map(item => (
-                                      <li key={item._id} style={{ marginBottom: '0.5rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                          <span className="break-words" style={{ fontWeight: 500 }}>{item.name}</span>
-                                          {item.price && (
-                                            <span style={{ color: '#4ecdc4', marginLeft: '1rem' }}>${item.price.toFixed(2)}</span>
-                                          )}
-                                        </div>
-                                        {item.description && (
-                                          <div className="break-words" style={{ fontSize: '0.9em', color: 'rgba(255, 255, 255, 0.5)', marginTop: '0.2rem' }}>
-                                            {item.description}
-                                          </div>
-                                        )}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            ))
-                          )}
-                        </div>
+                  <div style={{ 
+                    color: '#bdbdbd', 
+                    fontSize: isMobile ? '0.9rem' : '1.05rem', 
+                    fontFamily: '"Kelly Slab", cursive', 
+                    marginBottom: '0.5rem', 
+                    marginLeft: '0.1rem',
+                    lineHeight: isMobile ? '1.4' : '1.2',
+                  }}>{menu.description}</div>
+                              {menuItems[menu._id] && menuItems[menu._id].length > 0 && (
+                                <ul style={{
+                                  padding: 0,
+                                  margin: '0.5rem 0 0 0',
+                                  listStyle: 'none',
+                                  color: 'rgba(255, 255, 255, 0.7)',
+                                  fontSize: isMobile ? '0.85rem' : '1rem',
+                                }}>
+                                  {menuItems[menu._id].map(item => (
+                                    <li key={item._id} style={{ 
+                                      marginBottom: isMobile ? '0.3rem' : '0.5rem',
+                                    }}>
+                                      • {item.name} - ${typeof item.price === 'number' ? item.price.toFixed(2) : '0.00'}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
       </div>
-      <div className="bg-overlay"></div>
     </div>
   );
 };
