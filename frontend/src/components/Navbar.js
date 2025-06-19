@@ -142,16 +142,17 @@ const Navbar = () => {
           <ul className="navbar-nav mobile-nav" style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: '1rem',
-            padding: '80px 1.5rem',
+            alignItems: 'center',
+            width: '100%',
+            gap: '2rem',
+            padding: '120px 0',
             margin: 0,
             listStyle: 'none',
           }}>
-            <li><Link to="/" className="nav-link" onClick={() => setMenuOpen(false)} style={navLinkStyle}>Home</Link></li>
-            <li><Link to="/menus/create" className="nav-link" onClick={() => setMenuOpen(false)} style={navLinkStyle}>Create Menu</Link></li>
-            <li><span style={{ ...navLinkStyle, opacity: 0.6, cursor: 'default' }}>Make Reservation</span></li>
-            <li>
+            <li style={{ width: '100%', textAlign: 'center' }}><Link to="/" className="nav-link" onClick={() => setMenuOpen(false)} style={navLinkStyle}>Home</Link></li>
+            <li style={{ width: '100%', textAlign: 'center' }}><Link to="/menus/create" className="nav-link" onClick={() => setMenuOpen(false)} style={navLinkStyle}>Create Menu</Link></li>
+            <li style={{ width: '100%', textAlign: 'center' }}><span style={{ ...navLinkStyle, opacity: 0.6, cursor: 'default' }}>Make Reservation</span></li>
+            <li style={{ width: '100%', textAlign: 'center' }}>
               <a
                 href="#footer-contact"
                 className="nav-link"
